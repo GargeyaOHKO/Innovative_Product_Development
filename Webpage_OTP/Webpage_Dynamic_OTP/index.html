@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Servo Control</title>
+</head>
+<body>
+    <h2>Control Servos</h2>
+    <form id="servoForm">
+        <label for="servos">Enter Servo Numbers (comma-separated):</label><br>
+        <input type="text" id="servos" name="servos"><br><br>
+        
+        <label for="otp">Enter OTP:</label><br>
+        <input type="text" id="otp" name="otp"><br><br>
+        
+        <button type="button" onclick="generateOTP()">Generate OTP</button><br><br>
+        <button type="button" onclick="sendData()">Send</button>
+    </form>
+
+    <script>
+        let otp;
+
+        function generateOTP() {
+            fetch('http://172.20.10.3/generate_otp', {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                otp = data.otp;
+                alert('Generated OTP: ' + otp);
+                document.getElementById('otp').value = otp;
+            })
+            .catch(error => console.log('Error generating OTP:', error));
+        }
+
+        function sendData() {
+            let servos = document.getElementById('servos').value.split(',');
+            let enteredOtp = document.getElementById('otp').value;
+
+            let data = {
+                servos: servos,
+                otp: enteredOtp
+            };
+
+            fetch('http://172.20.10.3/move_servos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Servos moving successfully!');
+                } else {
+                    alert('Error moving servos or invalid OTP.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
